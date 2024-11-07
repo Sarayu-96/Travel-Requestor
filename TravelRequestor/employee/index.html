@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Home</title>
+    <!-- Add Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Employee Home</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="requestFormLink">Request Form</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        My Requests
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#" data-filter="all">All Requests</a>
+                        <a class="dropdown-item" href="#" data-filter="critical">Critical</a>
+                        <a class="dropdown-item" href="#" data-filter="normal">Normal</a>
+                        <a class="dropdown-item" href="#" data-filter="rejected">Rejected</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div id="requestFormContainer" style="display: none;">
+        <h2 class="text-center">Travel Request Form</h2>
+        <br>
+        <form id="travelRequestForm">
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="empid">Employee ID</label>
+                    <input type="text" class="form-control" id="empid" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="empname">Name</label>
+                    <input type="text" class="form-control" id="empname" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="project">Project</label>
+                    <input type="text" class="form-control" id="project" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="source">Source</label>
+                    <input type="text" class="form-control" id="source" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="destination">Destination</label>
+                    <input type="text" class="form-control" id="destination" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="priority">Priority</label>
+                    <select id="priority" class="form-control" name="priority" required>
+                        <option value="critical">Critical</option>
+                        <option value="normal">Normal</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="fromdate">From Date</label>
+                    <input type="date" class="form-control" id="fromdate" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="todate">To Date</label>
+                    <input type="date" class="form-control" id="todate" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="noofdays">No of Days</label>
+                    <input type="number" class="form-control" id="noofdays" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="mode">Mode of Travel</label>
+                    <input type="text" class="form-control" id="mode" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="cause">Cause of Travel</label>
+                <input type="text" class="form-control" id="cause" required>
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary">Request</button>
+            </div>
+        </form>
+    </div>
+    <div id="requestsContainer" style="display: none;">
+        <h2>Your Submitted Requests</h2>
+        <table id="requestsTable" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Project</th>
+                    <th>Cause</th>
+                    <th>Source</th>
+                    <th>Destination</th>
+                    <th>From Date</th>
+                    <th>To Date</th>
+                    <th>No of Days</th>
+                    <th>Mode</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Requests will be populated here -->
+            </tbody>
+        </table>
+    </div>
+    <script src="employeehome.js"></script>
+    <!-- Add Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var requestFormLink = document.getElementById('requestFormLink');
+        var dropdownItems = document.querySelectorAll('.dropdown-item');
+        var requestFormContainer = document.getElementById('requestFormContainer');
+        var requestsContainer = document.getElementById('requestsContainer');
+        var requestsTableBody = document.getElementById('requestsTable').getElementsByTagName('tbody')[0];
+    
+        requestFormLink.addEventListener('click', function(event) {
+            event.preventDefault();
+            requestFormContainer.style.display = 'block';
+            requestsContainer.style.display = 'none';
+        });
+    
+        dropdownItems.forEach(function(item) {
+            item.addEventListener('click', function(event) {
+                event.preventDefault();
+                var filter = event.target.getAttribute('data-filter');
+                displayRequests(filter);
+                requestFormContainer.style.display = 'none';
+                requestsContainer.style.display = 'block';
+            });
+        });
+    
+        function displayRequests(filter) {
+            // Retrieve the logged-in employee's ID (you can store this in local storage during login)
+            var loggedInEmpId = localStorage.getItem('loggedInEmpId');
+    
+            // Retrieve all employee requests from local storage
+            var employees = JSON.parse(localStorage.getItem('employees')) || [];
+    
+            // Filter the requests submitted by the logged-in employee
+            var employeeRequests = employees.filter(function(employee) {
+                return employee.empid === loggedInEmpId;
+            });
+    
+            // Apply the selected filter
+            if (filter !== 'all') {
+                employeeRequests = employeeRequests.filter(function(request) {
+                    return request.priority === filter;
+                });
+            }
+    
+            // Display the employee's requests in a table
+            requestsTableBody.innerHTML = ''; // Clear any existing rows
+            if (employeeRequests.length > 0) {
+                employeeRequests.forEach(function(request) {
+                    var row = requestsTableBody.insertRow();
+                    row.insertCell(0).textContent = request.project;
+                    row.insertCell(1).textContent = request.cause;
+                    row.insertCell(2).textContent = request.source;
+                    row.insertCell(3).textContent = request.destination;
+                    row.insertCell(4).textContent = request.fromdate;
+                    row.insertCell(5).textContent = request.todate;
+                    row.insertCell(6).textContent = request.noofdays;
+                    row.insertCell(7).textContent = request.mode;
+                    row.insertCell(8).textContent = request.priority;
+                    row.insertCell(9).textContent = request.status || 'Pending';
+                });
+            } else {
+                var row = requestsTableBody.insertRow();
+                var cell = row.insertCell(0);
+                cell.colSpan = 10;
+                cell.textContent = 'No requests submitted.';
+            }
+        }
+    
+        // Display all requests by default
+        displayRequests('all');
+    </script>
+</body>
+</html>

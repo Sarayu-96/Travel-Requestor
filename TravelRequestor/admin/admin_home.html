@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Travel Requests</title>
+    <!-- Add Bootstrap for styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+          .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header-container h1 {
+            margin: 0;
+        }
+        .logout-btn {
+            background-color: #df0505;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .logout-btn:hover {
+            background-color: #c24a04;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <!-- Admin Navigation -->
+        <div class="container">
+            <div class="header-container">
+                <h1>TRAVEL REQUESTOR</h1>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+
+        <!-- Tabs to switch between statuses -->
+        <ul class="nav nav-tabs" id="statusTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active" id="pending-tab" data-bs-toggle="tab" href="#pending" role="tab" aria-controls="pending" aria-selected="true">Pending Requests</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="approved-tab" data-bs-toggle="tab" href="#approved" role="tab" aria-controls="approved" aria-selected="false">Approved</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="rejected-tab" data-bs-toggle="tab" href="#rejected" role="tab" aria-controls="rejected" aria-selected="false">Rejected</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="hold-tab" data-bs-toggle="tab" href="#hold" role="tab" aria-controls="hold" aria-selected="false">On Hold</a>
+            </li>
+        </ul>
+
+        <!-- Tab content -->
+        <div class="tab-content mt-4" id="statusTabsContent">
+            <!-- Pending Requests Tab -->
+            <div class="tab-pane fade show active" id="pending" role="tabpanel" aria-labelledby="pending-tab">
+                <h2>Pending Requests</h2>
+                <table id="pendingRequestsTable" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Employee Name</th>
+                            <th>Cause</th>
+                            <th>Destination</th>
+                            <th>From Date</th>
+                            <th>To Date</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Pending Requests will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Approved Requests Tab -->
+            <div class="tab-pane fade" id="approved" role="tabpanel" aria-labelledby="approved-tab">
+                <h2>Approved Requests</h2>
+                <table id="approvedRequestsTable" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Employee Name</th>
+                            <th>Cause</th>
+                            <th>Destination</th>
+                            <th>From Date</th>
+                            <th>To Date</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Approved Requests will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Rejected Requests Tab -->
+            <div class="tab-pane fade" id="rejected" role="tabpanel" aria-labelledby="rejected-tab">
+                <h2>Rejected Requests</h2>
+                <table id="rejectedRequestsTable" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Employee Name</th>
+                            <th>Cause</th>
+                            <th>Destination</th>
+                            <th>From Date</th>
+                            <th>To Date</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Rejected Requests will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- On Hold Requests Tab -->
+            <div class="tab-pane fade" id="hold" role="tabpanel" aria-labelledby="hold-tab">
+                <h2>On Hold Requests</h2>
+                <table id="onHoldRequestsTable" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Employee Name</th>
+                            <th>Cause</th>
+                            <th>Destination</th>
+                            <th>From Date</th>
+                            <th>To Date</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- On Hold Requests will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JavaScript Code for Admin -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+    var requests = JSON.parse(localStorage.getItem('travelRequests')) || [];
+    var pendingTableBody = document.getElementById('pendingRequestsTable').getElementsByTagName('tbody')[0];
+    var approvedTableBody = document.getElementById('approvedRequestsTable').getElementsByTagName('tbody')[0];
+    var rejectedTableBody = document.getElementById('rejectedRequestsTable').getElementsByTagName('tbody')[0];
+    var onHoldTableBody = document.getElementById('onHoldRequestsTable').getElementsByTagName('tbody')[0];
+
+    // Function to display all pending requests
+    function displayPendingRequests() {
+        // Clear previous content
+        pendingTableBody.innerHTML = '';
+
+        // Loop through all requests and display pending ones
+        requests.forEach(function (request) {
+            if (request.status === 'Pending') {
+                var row = createRow(request);
+                pendingTableBody.appendChild(row);
+            }
+        });
+    }
+
+    // Function to create a row for a request
+    function createRow(request) {
+        var row = document.createElement('tr');
+        row.insertCell(0).textContent = request.empname;
+        row.insertCell(1).textContent = request.cause;
+        row.insertCell(2).textContent = request.destination;
+        row.insertCell(3).textContent = request.fromdate;
+        row.insertCell(4).textContent = request.todate;
+        row.insertCell(5).textContent = request.priority;
+        row.insertCell(6).textContent = request.status;
+
+        // Actions cell (approve, reject, hold buttons)
+        var actionsCell = row.insertCell(7);
+
+        // Add buttons for approve, reject, hold actions
+        if (request.status === 'Pending') {
+            // Approve button
+            var approveButton = document.createElement('button');
+            approveButton.classList.add('btn', 'btn-success', 'me-2');
+            approveButton.textContent = 'Approve';
+            approveButton.addEventListener('click', function () {
+                updateRequestStatus(request, 'Approved');
+            });
+
+            // Reject button
+            var rejectButton = document.createElement('button');
+            rejectButton.classList.add('btn', 'btn-danger', 'me-2');
+            rejectButton.textContent = 'Reject';
+            rejectButton.addEventListener('click', function () {
+                updateRequestStatus(request, 'Rejected');
+            });
+
+            // Hold button
+            var holdButton = document.createElement('button');
+            holdButton.classList.add('btn', 'btn-warning');
+            holdButton.textContent = 'Hold';
+            holdButton.addEventListener('click', function () {
+                updateRequestStatus(request, 'On Hold');
+            });
+
+            // Append action buttons
+            actionsCell.appendChild(approveButton);
+            actionsCell.appendChild(rejectButton);
+            actionsCell.appendChild(holdButton);
+        }
+
+        return row;
+    }
+
+    // Function to update request status (approve, reject, hold)
+    function updateRequestStatus(request, newStatus) {
+        var requestIndex = requests.findIndex(r => r.empid === request.empid && r.fromdate === request.fromdate); // Find the request
+        if (requestIndex !== -1) {
+            // Update the status
+            requests[requestIndex].status = newStatus;
+            localStorage.setItem('travelRequests', JSON.stringify(requests)); // Save back to localStorage
+
+            // Optionally, display a success message or update the UI
+            alert('Request status updated to: ' + newStatus);
+
+            // Refresh the requests for all tabs
+            displayPendingRequests();
+            displayApprovedRequests();
+            displayRejectedRequests();
+            displayOnHoldRequests();
+        }
+    }
+
+    // Function to display approved requests
+    function displayApprovedRequests() {
+        approvedTableBody.innerHTML = ''; // Clear previous content
+        requests.forEach(function (request) {
+            if (request.status === 'Approved') {
+                var row = createRow(request);
+                approvedTableBody.appendChild(row);
+            }
+        });
+    }
+
+    // Function to display rejected requests
+    function displayRejectedRequests() {
+        rejectedTableBody.innerHTML = ''; // Clear previous content
+        requests.forEach(function (request) {
+            if (request.status === 'Rejected') {
+                var row = createRow(request);
+                rejectedTableBody.appendChild(row);
+            }
+        });
+    }
+
+    // Function to display on hold requests
+    function displayOnHoldRequests() {
+        onHoldTableBody.innerHTML = ''; // Clear previous content
+        requests.forEach(function (request) {
+            if (request.status === 'On Hold') {
+                var row = createRow(request);
+                onHoldTableBody.appendChild(row);
+            }
+        });
+    }
+
+    // Initially load the pending requests when the page loads
+    displayPendingRequests();
+
+    // Optionally, you can call displayApprovedRequests, displayRejectedRequests, and displayOnHoldRequests to populate those tabs as well
+    displayApprovedRequests();
+    displayRejectedRequests();
+    displayOnHoldRequests();
+});
+
+
+    var logoutBtn = document.getElementById('logoutBtn');
+    
+    // Logout functionality
+    logoutBtn.addEventListener('click', function () {
+        // Clear localStorage or session data (if required)
+        // localStorage.removeItem('adminAuthenticated'); // Remove the flag indicating admin is logged in
+        
+        // Optionally, you can clear other related data if necessary
+        // localStorage.removeItem('someOtherKey'); 
+
+        // Redirect to login page or home page
+        window.location.href = 'adminlogin.html'; // Replace 'login.html' with your actual login page URL
+ 
+});
+
+
+    </script>
+</body>
+</html>
+

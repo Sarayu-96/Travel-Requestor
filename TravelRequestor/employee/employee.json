@@ -1,0 +1,14 @@
+[
+    {
+        "empid":"1",
+        "password": "password1"
+    },
+    {
+        "empid":"2", 
+        "password": "password2"
+    },
+    {
+        "empid":"3",
+        "password": "password3"
+    }
+]
